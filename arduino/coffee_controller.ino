@@ -23,13 +23,8 @@ void setup() {
 }
 
 void loop() {
-  //check if a new brewing cycle has started
-  if (!brewing && digitalRead(relay)) {
-    //record the start time
-    brew_start = millis();
-    //set brewing status
-    brewing = 1;
-  } else if (brewing) {
+  //check if a brewing cycle has started
+  if (brewing) {
     //check brew time
     if (millis() - brew_start > brew_max) {
       //turn off the coffee pot
@@ -42,16 +37,27 @@ void loop() {
 
 int coffee(String cmd) {
   if (cmd == "on") {
-    //turn on the coffee pot and return success
+    //turn on the coffee pot
     digitalWrite(relay, HIGH);
+    //set the brewing status
+    brewing = 1;
+    //save the start time
+    brew_start = millis();
+    //return success
     return 1;
   } else if (cmd == "off") {
-    //turn off the coffee pot and return success
+    //turn off the coffee pot
     digitalWrite(relay, LOW);
+    //set the brewing status
+    brewing = 0;
+    //return success
     return 1;
   } else {
     //turn off the coffee pot and return failure
     digitalWrite(relay, LOW);
+    //set the brewing status
+    brewing = 0;
+    //return failure
     return -1;
   }
 }

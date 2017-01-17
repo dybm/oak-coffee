@@ -1,11 +1,12 @@
-//define pin to use with Oak relay shield
+//oak relay shield pin
 const int relay = 5;
-
-//initialize boolean to keep track of if the brewing cycle has started
-bool brewing = false;
-//define max allowable brew time
-unsigned long brew_max = 360000; //6 minutes
-//define variable to hold the time the brewing cycle started
+//brewing status - an integer is used instead of a boolean
+//due to Particle's limitations on allowed data types for 
+//an exposed cloud variable (INT, DOUBLE, or STRING only)
+int brewing = 0;
+//max allowable brew time (6 minutes)
+unsigned long brew_max = 360000;
+//time brewing began
 unsigned long brew_start;
 
 //define Particle function
@@ -16,25 +17,25 @@ void setup() {
   pinMode(relay, OUTPUT);
   digitalWrite(relay, LOW);
   
-  //register Particle function
+  //register Particle cloud functions
   Particle.function("coffee", coffee);
+  Particle.variable("brewing", brewing);
 }
 
 void loop() {
   //check if a new brewing cycle has started
   if (!brewing && digitalRead(relay)) {
-    //a new brewing cycle has started
     //record the start time
     brew_start = millis();
-    //toggle the brewing boolean
-    brewing = true;
+    //set brewing status
+    brewing = 1;
   } else if (brewing) {
-    //check that the max brewing time has not been exceeded
+    //check brew time
     if (millis() - brew_start > brew_max) {
       //turn off the coffee pot
       digitalWrite(relay, LOW);
-      //toggle the brewing boolean
-      brewing = false;
+      //set brewing status
+      brewing = 0;
     }
   }
 }
